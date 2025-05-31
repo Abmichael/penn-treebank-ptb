@@ -1,0 +1,50 @@
+# Penn Treebank Language Modeling Configuration
+# Updated based on exploratory data analysis
+
+# Model Configuration
+model:
+  type: "LSTM"  # Options: LSTM, GRU, Transformer
+  vocab_size: 10000  # Will be set based on actual data (recommended: words with freq >= 3)
+  embedding_dim: 1024  # Match hidden_dim for weight tying
+  hidden_dim: 1024   # Increased for better capacity
+  num_layers: 3      # Increased from 2 to 3
+  dropout: 0.3       # Increased for better regularization
+  tie_weights: true  # Tie input and output embeddings
+
+# Training Configuration
+training:
+  batch_size: 64     # Increased from 32 based on recommendations
+  sequence_length: 70  # Based on 90th percentile of sentence lengths
+  learning_rate: 0.0002  # Reduced for more stable training
+  max_epochs: 50     # Increased for better convergence
+  gradient_clip: 1.0  # Increased based on recommendations
+  patience: 5        # Reduced for earlier stopping
+  warmup_steps: 4000 # Learning rate warmup
+  
+# Data Configuration
+data:
+  data_dir: "data/ptb"
+  train_file: "ptb.train.txt"
+  valid_file: "ptb.valid.txt"
+  test_file: "ptb.test.txt"
+  min_freq: 3        # Based on analysis: good coverage with reasonable vocab size
+  max_vocab_size: 30000  # Maximum vocabulary size
+  
+# Logging and Checkpoints
+logging:
+  log_interval: 500   # Log every N batches (reduced frequency)
+  save_dir: "checkpoints"
+  tensorboard_dir: "runs"
+  save_best_only: true
+  
+# Evaluation
+evaluation:
+  eval_batch_size: 32  # Increased from 10
+  eval_interval: 1     # Evaluate every N epochs
+  
+# Advanced Training Options
+advanced:
+  use_scheduler: true
+  scheduler_type: "cosine"  # Options: cosine, step, exponential
+  weight_decay: 1e-6
+  label_smoothing: 0.1
