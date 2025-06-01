@@ -50,15 +50,15 @@ A crucial step in this project was the preprocessing of the raw PTB data to make
 The primary script for this is `scripts/preprocess_ptb.py`.
 
 ### 3.3. Dataset Statistics
-(As per `PROJECT_STATUS.md` and `README.md`)
+(As per `notebooks/ptb_exploratory_analysis.ipynb`)
 
-| Split | Sentences | Words     | Vocabulary | Avg Length |
-|-------|-----------|-----------|------------|------------|
-| Train | 2,000     | 1,025,863 | 23,782     | 25.9       |
-| Valid | 100       | 60,017    | 5,949      | 31.0       |
-| Test  | 100       | 56,924    | 5,833      | 28.5       |
+| Split      | Sentences | Total Words | Unique Words | Avg Sentence Length | Median Sentence Length | Min Sentence Length | Max Sentence Length | Std Sentence Length | Type-Token Ratio |
+|------------|-----------|-------------|--------------|---------------------|------------------------|---------------------|---------------------|---------------------|------------------|
+| Train      | 42,068    | 929,589     | 49,208       | 22.1                | 19.0                   | 1                   | 236                 | 15.1                | 0.05             |
+| Validation | 3,370     | 73,760      | 15,196       | 21.9                | 18.0                   | 1                   | 153                 | 15.2                | 0.21             |
+| Test       | 3,761     | 82,430      | 16,360       | 21.9                | 18.0                   | 1                   | 146                 | 15.4                | 0.20             |
 
-*Note: Vocabulary counts here might refer to unique words before applying frequency-based filtering for the final model vocabulary.*
+*Note: Unique words refer to the vocabulary size before applying frequency-based filtering for the final model vocabulary. Avg Length is the mean sentence length.*
 
 ### 3.4. Vocabulary Strategy
 - **Recommended Vocab Size**: 30,000 words (based on frequency ≥ 3).
@@ -96,12 +96,12 @@ LSTMs are a type of RNN designed to overcome the vanishing gradient problem, all
 
 The model definition can be found in `src/model.py`.
 
-### 5.2. Key Hyperparameters (from `PROJECT_STATUS.md` and `config.yaml`)
-- **Sequence Length**: 70 tokens (chosen to cover ~90% of sentences).
-- **Embedding Dimension**: 512 / 1024.
-- **Hidden Dimension**: 1024.
-- **Number of LSTM Layers**: 3.
-- **Dropout Rate**: 0.3.
+### 5.2. Key Hyperparameters (example from `config_colab_full.yaml`)
+- **Sequence Length**: 35 (PTB standard, can be adjusted based on EDA)
+- **Embedding Dimension**: 650
+- **Hidden Dimension**: 650
+- **Number of LSTM Layers**: 2
+- **Dropout Rate**: 0.5
 
 ## 6. Training Techniques
 
@@ -161,8 +161,133 @@ The training pipeline is implemented in `src/train.py`.
 ## 8. Project Workflow & Tools
 
 ### 8.1. Configuration Management
-- **`config/config.yaml`**: A central YAML file stores hyperparameters and settings for the model, training, and data. This allows for easy experiment management and reproducibility.
-- Different configurations (e.g., `config_colab_full.yaml`, `config_colab_quick.yaml`) can be used for different environments or experiment scales.
+Configuration settings for model architecture, training parameters, and data paths are managed using YAML files. This allows for easy experiment tracking and reproducibility. Instead of a single `config.yaml`, this project utilizes specific configuration files for different environments or training goals:
+
+#### 8.1.1. `config_colab_full.yaml` - Comprehensive Training
+This configuration is optimized for more extensive training runs, potentially on platforms like Google Colab with GPU access.
+
+**Model Configuration:**
+```yaml
+model:
+  type: "LSTM"
+  vocab_size: 10000  # Placeholder, set by data preprocessing
+  embedding_dim: 650
+  hidden_dim: 650
+  num_layers: 2
+  dropout: 0.5
+  tie_weights: true
+```
+
+**Training Configuration:**
+```yaml
+training:
+  batch_size: 64
+  sequence_length: 35
+  learning_rate: 0.001
+  max_epochs: 40
+  gradient_clip: 0.25
+  patience: 5
+  warmup_steps: 1000
+```
+
+**Data Configuration:**
+```yaml
+data:
+  data_dir: "data/ptb"
+  train_file: "ptb.train.txt"
+  valid_file: "ptb.valid.txt"
+  test_file: "ptb.test.txt"
+  min_freq: 2
+  max_vocab_size: 15000
+```
+
+**Logging and Checkpoints:**
+```yaml
+logging:
+  log_interval: 100
+  save_dir: "checkpoints_full"
+  tensorboard_dir: "runs_full"
+  save_best_only: true
+```
+
+**Evaluation:**
+```yaml
+evaluation:
+  eval_batch_size: 64
+  eval_interval: 1
+```
+
+**Advanced Training Options:**
+```yaml
+advanced:
+  use_scheduler: true
+  scheduler_type: "cosine"
+  weight_decay: 1e-6
+  label_smoothing: 0.0
+```
+
+#### 8.1.2. `config_colab_quick.yaml` - Quick Testing
+This configuration is designed for rapid testing and debugging, suitable for quick checks on functionality or for environments with limited computational resources.
+
+**Model Configuration (Smaller):**
+```yaml
+model:
+  type: "LSTM"
+  vocab_size: 10000  # Placeholder, set by data preprocessing
+  embedding_dim: 256
+  hidden_dim: 256
+  num_layers: 2
+  dropout: 0.3
+  tie_weights: true
+```
+
+**Training Configuration (Quick Test):**
+```yaml
+training:
+  batch_size: 128
+  sequence_length: 35
+  learning_rate: 0.001
+  max_epochs: 3
+  gradient_clip: 1.0
+  patience: 2
+  warmup_steps: 500
+```
+
+**Data Configuration:**
+```yaml
+data:
+  data_dir: "data/ptb"
+  train_file: "ptb.train.txt"
+  valid_file: "ptb.valid.txt"
+  test_file: "ptb.test.txt"
+  min_freq: 2
+  max_vocab_size: 15000
+```
+
+**Logging and Checkpoints:**
+```yaml
+logging:
+  log_interval: 50
+  save_dir: "checkpoints" # General checkpoints for quick tests
+  tensorboard_dir: "runs"    # General runs for quick tests
+  save_best_only: true
+```
+
+**Evaluation:**
+```yaml
+evaluation:
+  eval_batch_size: 128
+  eval_interval: 1
+```
+
+**Advanced Training Options:**
+```yaml
+advanced:
+  use_scheduler: true
+  scheduler_type: "cosine"
+  weight_decay: 1e-6
+  label_smoothing: 0.0
+```
 
 ### 8.2. Key Scripts
 - **`scripts/download_data.py`**: Provides instructions or utilities for obtaining the PTB dataset.
