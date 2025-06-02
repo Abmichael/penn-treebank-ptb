@@ -4,7 +4,7 @@
 # Model Configuration
 model:
   type: "LSTM"  # Options: LSTM, GRU, Transformer
-  vocab_size: 10000  # Will be set based on actual data (recommended: words with freq >= 3)
+  vocab_size: 18059  # Updated to actual vocabulary size from build_vocabulary.py
   embedding_dim: 1024  # Match hidden_dim for weight tying
   hidden_dim: 1024   # Increased for better capacity
   num_layers: 3      # Increased from 2 to 3

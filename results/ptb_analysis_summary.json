@@ -1,0 +1,8 @@
+{
+  "total_vocab_size": 48231,
+  "train_vocab_size": 46069,
+  "recommended_vocab_size": 18057,
+  "recommended_seq_length": 38,
+  "train_valid_overlap": 86.60450843856957,
+  "train_test_overlap": 87.34747067882952
+}

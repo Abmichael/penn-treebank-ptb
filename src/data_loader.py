@@ -161,7 +161,9 @@ def load_ptb_data(data_dir, min_freq=1, sequence_length=35, batch_size=32):
             vocab.build_vocab([train_text], min_freq=min_freq)
         else:
             print("Warning: Training file not found. Building vocabulary from placeholder data.")
-            placeholder = vocab._generate_placeholder_text()
+            # Create dummy dataset to get placeholder text
+            dummy_dataset = PTBDataset("dummy", vocab, sequence_length)
+            placeholder = dummy_dataset._generate_placeholder_text()
             vocab.build_vocab([placeholder], min_freq=min_freq)
         
         # Save vocabulary

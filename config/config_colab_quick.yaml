@@ -4,7 +4,7 @@
 # Model Configuration (Smaller for quick testing)
 model:
   type: "LSTM"
-  vocab_size: 10000  # Will be set based on actual data
+  vocab_size: 18059   # Updated to actual vocabulary size
   embedding_dim: 256  # Smaller for speed
   hidden_dim: 256     # Smaller for speed
   num_layers: 2       # Fewer layers for speed
@@ -27,8 +27,8 @@ data:
   train_file: "ptb.train.txt"
   valid_file: "ptb.valid.txt"
   test_file: "ptb.test.txt"
-  min_freq: 2         # Lower threshold for more vocab
-  max_vocab_size: 15000
+  min_freq: 3         # Updated to match vocabulary builder
+  max_vocab_size: 20000 # Increased to accommodate actual vocab size
   
 # Logging and Checkpoints
 logging:

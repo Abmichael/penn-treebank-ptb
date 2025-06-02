@@ -12,50 +12,87 @@ from tqdm import tqdm
 
 def clean_pos_tagged_text(text):
     """
-    Convert POS-tagged Penn Treebank text to plain text.
+    Convert POS-tagged Penn Treebank text to plain text and split into sentences.
     
     Args:
         text (str): POS-tagged text with format like "word/POS"
         
     Returns:
-        str: Plain text with words only
+        list: List of sentences as plain text
     """
-    # Remove brackets
-    text = re.sub(r'\[|\]', '', text)
+    sentences = []
     
-    # Extract words from word/POS format
-    # Match word/POS patterns and extract just the word part
-    words = []
+    # Remove section separators and comments
+    lines = []
     for line in text.split('\n'):
         line = line.strip()
         if line and not line.startswith('//') and not line.startswith('==='):
-            # Split by whitespace and process each token
-            tokens = line.split()
-            for token in tokens:
-                if '/' in token and token != '/./':  # Handle special case of "./"
+            lines.append(line)
+    
+    # Join all lines and process as one block
+    full_text = ' '.join(lines)
+    
+    # Remove brackets but keep the content inside
+    full_text = re.sub(r'\[|\]', '', full_text)
+    
+    # Split on sentence boundaries (./. followed by space or end)
+    # This regex finds "./." followed by whitespace or end of string
+    sentence_parts = re.split(r'\./\.\s+', full_text)
+    
+    for part in sentence_parts:
+        if not part.strip():
+            continue
+            
+        # Extract words from word/POS format
+        words = []
+        tokens = part.split()
+        
+        for token in tokens:
+            if '/' in token:
+                # Handle special cases
+                if token == '/./':
+                    continue  # Skip sentence end markers
+                elif token == '--/:':
+                    words.append('--')
+                elif token.endswith('/.'):
+                    # Handle end of sentence tokens like "1989/CD./."
+                    word = token.rsplit('/', 1)[0]
+                    if word:
+                        words.append(word)
+                else:
                     # Split on last slash to handle cases like "U.S./NNP"
                     word = token.rsplit('/', 1)[0]
-                    if word:  # Only add non-empty words
+                    if word and word not in ['``', "''", '-LRB-', '-RRB-']:
+                        # Convert PTB symbols back to regular punctuation
+                        if word == '-LRB-':
+                            word = '('
+                        elif word == '-RRB-':
+                            word = ')'
                         words.append(word)
-                elif token and not token.startswith('/'):
-                    # Handle tokens without POS tags
-                    words.append(token)
+            elif token and not token.startswith('/'):
+                # Handle tokens without POS tags
+                words.append(token)
+        
+        if words:  # Only add non-empty sentences
+            sentence = ' '.join(words).strip()
+            if sentence:
+                sentences.append(sentence)
     
-    return ' '.join(words)
+    return sentences
 
 
 def process_ptb_file(filepath):
-    """Process a single PTB .pos file and return cleaned text."""
+    """Process a single PTB .pos file and return cleaned sentences."""
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
         
-        # Clean the content
-        cleaned = clean_pos_tagged_text(content)
-        return cleaned
+        # Clean the content and get list of sentences
+        sentences = clean_pos_tagged_text(content)
+        return sentences
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
-        return ""
+        return []
 
 
 def get_standard_split_sections():
@@ -111,13 +148,16 @@ def create_ptb_splits(ptb_root, output_dir):
             pos_files.sort()  # Ensure consistent ordering
             
             print(f"  Section {section:02d}: {len(pos_files)} files")
-            
-            # Process each file
+              # Process each file
             for pos_file in tqdm(pos_files, desc=f"Section {section:02d}"):
-                cleaned_text = process_ptb_file(pos_file)
-                if cleaned_text.strip():
-                    # Add sentence end token and newline
-                    all_text.append(cleaned_text.strip() + " <eos>")
+                sentences = process_ptb_file(pos_file)
+                
+                # Add each sentence with <eos> token
+                for sentence in sentences:
+                    if sentence.strip():
+                        all_text.append(sentence.strip() + " <eos>")
+                
+                if sentences:  # Count files that had sentences
                     total_files += 1
         
         # Write to output file
