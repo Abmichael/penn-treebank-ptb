@@ -50,20 +50,21 @@ A crucial step in this project was the preprocessing of the raw PTB data to make
 The primary script for this is `scripts/preprocess_ptb.py`.
 
 ### 3.3. Dataset Statistics
-(As per `notebooks/ptb_exploratory_analysis.ipynb`)
+(As per `results/ptb_dataset_statistics.csv`)
 
 | Split      | Sentences | Total Words | Unique Words | Avg Sentence Length | Median Sentence Length | Min Sentence Length | Max Sentence Length | Std Sentence Length | Type-Token Ratio |
 |------------|-----------|-------------|--------------|---------------------|------------------------|---------------------|---------------------|---------------------|------------------|
-| Train      | 42,068    | 929,589     | 49,208       | 22.1                | 19.0                   | 1                   | 236                 | 15.1                | 0.05             |
-| Validation | 3,370     | 73,760      | 15,196       | 21.9                | 18.0                   | 1                   | 153                 | 15.2                | 0.21             |
-| Test       | 3,761     | 82,430      | 16,360       | 21.9                | 18.0                   | 1                   | 146                 | 15.4                | 0.20             |
+| Train      | 42,065    | 1,010,572   | 46,069       | 24.0                | 23.0                   | 2                   | 139                 | 11.2                | 0.046            |
+| Validation | 2,460     | 59,115      | 8,473        | 24.0                | 23.0                   | 2                   | 114                 | 11.1                | 0.143            |
+| Test       | 2,346     | 55,851      | 8,441        | 23.8                | 23.0                   | 2                   | 75                  | 10.8                | 0.151            |
 
 *Note: Unique words refer to the vocabulary size before applying frequency-based filtering for the final model vocabulary. Avg Length is the mean sentence length.*
 
 ### 3.4. Vocabulary Strategy
-- **Recommended Vocab Size**: 30,000 words (based on frequency ≥ 3).
-- **Coverage**: This covers ~99.1% of training tokens.
-- **OOV Rate**: Expected ~2.8-2.9% on validation/test sets.
+- **Total Vocab Size**: 48,231 unique words
+- **Recommended Vocab Size**: 18,057 words (based on frequency ≥ 3).
+- **Vocabulary Overlap**: 86.6% train-valid overlap, 87.3% train-test overlap.
+- **Recommended Sequence Length**: 38 tokens (based on analysis).
 - **Special Tokens**: `<pad>`, `<unk>`, `<eos>`.
 
 ## 4. Exploratory Data Analysis (EDA)
@@ -97,7 +98,7 @@ LSTMs are a type of RNN designed to overcome the vanishing gradient problem, all
 The model definition can be found in `src/model.py`.
 
 ### 5.2. Key Hyperparameters (example from `config_colab_full.yaml`)
-- **Sequence Length**: 35 (PTB standard, can be adjusted based on EDA)
+- **Sequence Length**: 38 (recommended based on analysis, can be adjusted)
 - **Embedding Dimension**: 650
 - **Hidden Dimension**: 650
 - **Number of LSTM Layers**: 2

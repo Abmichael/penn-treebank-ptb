@@ -158,14 +158,40 @@ def main():
     model = model.to(device)
     
     print(f"Model created with {count_parameters(model):,} parameters")
-    
-    # Loss function and optimizer
+      # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config['training']['learning_rate'])
-      # Learning rate scheduler
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=5
-    )
+    
+    # Get weight decay from config
+    weight_decay = config.get('advanced', {}).get('weight_decay', 0.0)
+    optimizer = optim.Adam(model.parameters(), lr=config['training']['learning_rate'], weight_decay=weight_decay)
+    
+    # Learning rate scheduler
+    scheduler_config = config.get('advanced', {})
+    use_scheduler = scheduler_config.get('use_scheduler', True)
+    scheduler_type = scheduler_config.get('scheduler_type', 'reduce_on_plateau')
+    
+    if use_scheduler:
+        if scheduler_type == 'reduce_on_plateau':
+            scheduler_patience = scheduler_config.get('scheduler_patience', 5)
+            scheduler_factor = scheduler_config.get('scheduler_factor', 0.5)
+            scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, mode='min', factor=scheduler_factor, patience=scheduler_patience
+            )
+        elif scheduler_type == 'cosine':
+            scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=config['training']['max_epochs']
+            )
+        elif scheduler_type == 'step':
+            scheduler = optim.lr_scheduler.StepLR(
+                optimizer, step_size=10, gamma=0.5
+            )
+        else:
+            print(f"Warning: Unknown scheduler type {scheduler_type}, using ReduceLROnPlateau")
+            scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, mode='min', factor=0.5, patience=5
+            )
+    else:
+        scheduler = None
     
     # Early stopping
     early_stopping = EarlyStopping(
@@ -200,12 +226,15 @@ def main():
                 model, train_loader, criterion, optimizer, device,
             gradient_clip=config['training']['gradient_clip']
         )
-        
-        # Validate
+          # Validate
         val_loss, val_ppl = evaluate(model, valid_loader, criterion, device)
         
         # Update learning rate
-        scheduler.step(val_loss)
+        if scheduler is not None:
+            if scheduler_type == 'reduce_on_plateau':
+                scheduler.step(val_loss)
+            else:
+                scheduler.step()
         
         # Save metrics
         train_losses.append(train_loss)

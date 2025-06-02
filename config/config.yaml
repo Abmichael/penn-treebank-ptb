@@ -3,8 +3,8 @@
 
 # Model Configuration
 model:
-  type: "LSTM"  # Options: LSTM, GRU, Transformer
-  vocab_size: 18059  # Updated to actual vocabulary size from build_vocabulary.py
+  type: "LSTM"  # Options: LSTM, GRU, Transformer  
+  vocab_size: 18057  # Updated to recommended vocabulary size from analysis
   embedding_dim: 1024  # Match hidden_dim for weight tying
   hidden_dim: 1024   # Increased for better capacity
   num_layers: 3      # Increased from 2 to 3
@@ -14,7 +14,7 @@ model:
 # Training Configuration
 training:
   batch_size: 64     # Increased from 32 based on recommendations
-  sequence_length: 70  # Based on 90th percentile of sentence lengths
+  sequence_length: 38  # Based on recommended sequence length from analysis
   learning_rate: 0.0002  # Reduced for more stable training
   max_epochs: 50     # Increased for better convergence
   gradient_clip: 1.0  # Increased based on recommendations

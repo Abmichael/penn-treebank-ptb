@@ -16,9 +16,9 @@ Proj-2-Penn Treebank (PTB)/
 │   └── ptb/
 │       ├── LDC99T42_Penn_Treebank_3.tar.zst  # Original archive
 │       ├── LDC99T42/            # Extracted raw data
-│       ├── ptb.train.txt        # Training data (2,000 sentences, 1M+ words)
-│       ├── ptb.valid.txt        # Validation data (100 sentences, 60K words)
-│       └── ptb.test.txt         # Test data (100 sentences, 57K words)
+│       ├── ptb.train.txt        # Training data (42,065 sentences, 1M+ words)
+│       ├── ptb.valid.txt        # Validation data (2,460 sentences, 59K words)
+│       └── ptb.test.txt         # Test data (2,346 sentences, 56K words)
 ├── notebooks/
 │   └── ptb_exploratory_analysis.ipynb  # Comprehensive EDA notebook
 ├── scripts/
@@ -60,20 +60,21 @@ Proj-2-Penn Treebank (PTB)/
 
 | Split | Sentences | Words | Vocabulary | Avg Length |
 |-------|-----------|-------|------------|------------|
-| Train | 2,000 | 1,025,863 | 23,782 | 25.9 |
-| Valid | 100 | 60,017 | 5,949 | 31.0 |
-| Test | 100 | 56,924 | 5,833 | 28.5 |
+| Train | 42,065 | 1,010,572 | 46,069 | 24.0 |
+| Valid | 2,460 | 59,115 | 8,473 | 24.0 |
+| Test | 2,346 | 55,851 | 8,441 | 23.8 |
 
 ## 🎯 Key Findings & Recommendations
 
 ### Vocabulary Strategy
-- **Recommended vocab size**: 30,000 words (frequency ≥ 3)
-- **Coverage**: 99.1% of training tokens
-- **OOV rate**: ~2.9% on validation, ~2.8% on test
+- **Total vocab size**: 48,231 unique words
+- **Recommended vocab size**: 18,057 words (frequency ≥ 3)
+- **Train-validation overlap**: 86.6%
+- **Train-test overlap**: 87.3%
 - **Special tokens**: `<pad>`, `<unk>`, `<eos>`
 
 ### Model Architecture
-- **Sequence length**: 70 tokens (covers 90% of sentences)
+- **Sequence length**: 38 tokens (recommended based on analysis)
 - **Embedding dimension**: 512
 - **Hidden dimension**: 1024
 - **Layers**: 3 for LSTM, 6-12 for Transformer

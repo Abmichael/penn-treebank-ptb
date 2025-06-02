@@ -3,8 +3,8 @@
 
 # Model Configuration (Smaller for quick testing)
 model:
-  type: "LSTM"
-  vocab_size: 18059   # Updated to actual vocabulary size
+  type: "LSTM"  
+  vocab_size: 18057   # Updated to recommended vocabulary size from analysis
   embedding_dim: 256  # Smaller for speed
   hidden_dim: 256     # Smaller for speed
   num_layers: 2       # Fewer layers for speed
@@ -14,7 +14,7 @@ model:
 # Training Configuration (Quick test)
 training:
   batch_size: 128     # Larger batch for GPU
-  sequence_length: 35 # Shorter sequences for speed
+  sequence_length: 38 # Updated based on analysis recommendations
   learning_rate: 0.001
   max_epochs: 3       # Just 3 epochs for quick test
   gradient_clip: 1.0

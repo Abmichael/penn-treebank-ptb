@@ -40,14 +40,14 @@ jupyter notebook notebooks/ptb_exploratory_analysis.ipynb
 
 | Split | Sentences | Words | Vocabulary | Avg Length |
 |-------|-----------|-------|------------|------------|
-| Train | 2,000 | 1,025,863 | 23,782 | 25.9 |
-| Valid | 100 | 60,017 | 5,949 | 31.0 |
-| Test | 100 | 56,924 | 5,833 | 28.5 |
+| Train | 42,065 | 1,010,572 | 46,069 | 24.0 |
+| Valid | 2,460 | 59,115 | 8,473 | 24.0 |
+| Test | 2,346 | 55,851 | 8,441 | 23.8 |
 
 ## 🧠 Model Architecture
 
 - **Type**: LSTM Language Model
-- **Vocabulary**: 18,061 words (frequency ≥ 3)
+- **Vocabulary**: 48,231 total words, 18,057 recommended (frequency ≥ 3)
 - **Embedding Dimension**: 1024
 - **Hidden Dimension**: 1024 
 - **Layers**: 3

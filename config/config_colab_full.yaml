@@ -3,8 +3,8 @@
 
 # Model Configuration
 model:
-  type: "LSTM"
-  vocab_size: 18059   # Updated to actual vocabulary size from build_vocabulary.py
+  type: "LSTM"  
+  vocab_size: 18057   # Updated to recommended vocabulary size from analysis
   embedding_dim: 650  # Larger for better performance
   hidden_dim: 650     # Larger for better performance
   num_layers: 2       # Standard for PTB LSTM
@@ -14,7 +14,7 @@ model:
 # Training Configuration
 training:
   batch_size: 64      # Adjusted for potentially larger model
-  sequence_length: 35 # Standard for PTB
+  sequence_length: 38 # Updated based on analysis recommendations
   learning_rate: 0.001 # Adam learning rate
   max_epochs: 40      # Sufficient epochs for convergence
   gradient_clip: 0.25 # Common gradient clipping for PTB
