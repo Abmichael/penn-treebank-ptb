@@ -1,0 +1,50 @@
+# Penn Treebank Language Modeling Configuration - Colab Full Training
+# Optimized for comprehensive training on Google Colab
+
+# Model Configuration
+model:
+  type: "LSTM"
+  vocab_size: 10000  # Will be set based on actual data
+  embedding_dim: 650  # Larger for better performance
+  hidden_dim: 650     # Larger for better performance
+  num_layers: 2       # Standard for PTB LSTM
+  dropout: 0.5        # Common dropout rate for PTB
+  tie_weights: true
+
+# Training Configuration
+training:
+  batch_size: 64      # Adjusted for potentially larger model
+  sequence_length: 35 # Standard for PTB
+  learning_rate: 0.001 # Adam learning rate
+  max_epochs: 40      # Sufficient epochs for convergence
+  gradient_clip: 0.25 # Common gradient clipping for PTB
+  patience: 5         # Patience for early stopping
+  warmup_steps: 1000
+  
+# Data Configuration
+data:
+  data_dir: "data/ptb" # Relative path for Colab environment
+  train_file: "ptb.train.txt"
+  valid_file: "ptb.valid.txt"
+  test_file: "ptb.test.txt"
+  min_freq: 2
+  max_vocab_size: 15000
+  
+# Logging and Checkpoints
+logging:
+  log_interval: 100   # Log less frequently for longer training
+  save_dir: "checkpoints_full" # Separate directory for full training checkpoints
+  tensorboard_dir: "runs_full"   # Separate directory for full training runs
+  save_best_only: true
+  
+# Evaluation
+evaluation:
+  eval_batch_size: 64 # Consistent with training batch size
+  eval_interval: 1    # Evaluate every epoch
+  
+# Advanced Training Options
+advanced:
+  use_scheduler: true
+  scheduler_type: "cosine" # Or "reduce_on_plateau"
+  weight_decay: 1e-6
+  label_smoothing: 0.0
