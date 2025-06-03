@@ -148,27 +148,49 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = False
 
 
-def plot_training_curves(train_losses, val_losses, train_perplexities, val_perplexities, save_path=None):
-    """Plot training and validation curves."""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+def plot_training_curves(train_losses, val_losses, train_perplexities, val_perplexities, learning_rates=None, save_path=None):
+    """Plot training and validation curves with optional learning rate evolution."""
+    if learning_rates is not None:
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5))
+    else:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     
     # Plot losses
-    ax1.plot(train_losses, label='Train Loss', color='blue')
-    ax1.plot(val_losses, label='Validation Loss', color='red')
+    ax1.plot(train_losses, label='Train Loss', color='blue', linewidth=2)
+    ax1.plot(val_losses, label='Validation Loss', color='red', linewidth=2)
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Loss')
     ax1.set_title('Training and Validation Loss')
     ax1.legend()
-    ax1.grid(True)
+    ax1.grid(True, alpha=0.3)
     
     # Plot perplexities
-    ax2.plot(train_perplexities, label='Train Perplexity', color='blue')
-    ax2.plot(val_perplexities, label='Validation Perplexity', color='red')
+    ax2.plot(train_perplexities, label='Train Perplexity', color='blue', linewidth=2)
+    ax2.plot(val_perplexities, label='Validation Perplexity', color='red', linewidth=2)
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('Perplexity')
     ax2.set_title('Training and Validation Perplexity')
     ax2.legend()
-    ax2.grid(True)
+    ax2.grid(True, alpha=0.3)
+    
+    # Plot learning rate evolution if provided
+    if learning_rates is not None:
+        ax3.plot(learning_rates, label='Learning Rate', color='green', linewidth=2, marker='o', markersize=3)
+        ax3.set_xlabel('Epoch')
+        ax3.set_ylabel('Learning Rate')
+        ax3.set_title('Learning Rate Evolution')
+        ax3.set_yscale('log')  # Log scale for better visualization
+        ax3.legend()
+        ax3.grid(True, alpha=0.3)
+        
+        # Add annotations for learning rate reductions
+        for i in range(1, len(learning_rates)):
+            if learning_rates[i] < learning_rates[i-1]:
+                ax3.annotate(f'LR Reduced\nEpoch {i+1}', 
+                           xy=(i, learning_rates[i]), 
+                           xytext=(i, learning_rates[i] * 2),
+                           arrowprops=dict(arrowstyle='->', color='red', alpha=0.7),
+                           fontsize=9, ha='center', color='red')
     
     plt.tight_layout()
     

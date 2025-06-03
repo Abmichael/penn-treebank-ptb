@@ -1,0 +1,53 @@
+# Penn Treebank Language Modeling - Optimal Unified Configuration
+# One config to rule them all: balanced for performance without overfitting/underfitting
+# Combines best practices from analysis and empirical results
+
+# Model Configuration
+model:
+  type: "LSTM"
+  vocab_size: 18057      # Based on actual vocabulary analysis
+  embedding_dim: 650     # Optimal size for PTB - good capacity without overfitting
+  hidden_dim: 650        # Match embedding_dim for weight tying
+  num_layers: 2          # Standard for PTB - more layers = overfitting risk
+  dropout: 0.5           # Standard dropout rate that works well for PTB
+  tie_weights: true      # Reduces parameters and improves generalization
+
+# Training Configuration
+training:
+  batch_size: 64         # Good balance of memory usage and gradient stability
+  sequence_length: 35    # Standard for PTB, proven optimal length
+  learning_rate: 0.001   # Conservative learning rate for stable training
+  max_epochs: 40         # Sufficient for convergence without overtraining
+  gradient_clip: 0.25    # Prevents exploding gradients in RNNs
+  patience: 5            # Early stopping to prevent overfitting
+  warmup_steps: 1000     # Gradual learning rate warmup for stability
+  
+# Data Configuration
+data:
+  data_dir: "data/ptb"
+  train_file: "ptb.train.txt"
+  valid_file: "ptb.valid.txt"
+  test_file: "ptb.test.txt"
+  min_freq: 3            # Good coverage while keeping vocab manageable
+  max_vocab_size: 20000  # Reasonable limit for vocabulary size
+  
+# Logging and Checkpoints
+logging:
+  log_interval: 200      # Balanced logging frequency
+  save_dir: "checkpoints"
+  tensorboard_dir: "runs"
+  save_best_only: true   # Save only the best model to save space
+  
+# Evaluation
+evaluation:
+  eval_batch_size: 64    # Match training batch size
+  eval_interval: 1       # Evaluate every epoch for monitoring
+  
+# Advanced Training Options
+advanced:
+  use_scheduler: true
+  scheduler_type: "reduce_on_plateau"  # Adaptive learning rate reduction
+  scheduler_patience: 3                # Wait 3 epochs before reducing LR
+  scheduler_factor: 0.5                # Reduce LR by half when triggered
+  weight_decay: 1e-4                   # Moderate regularization
+  label_smoothing: 0.0                 # No label smoothing for language modeling

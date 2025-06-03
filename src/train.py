@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from data_loader import load_ptb_data
 from model import create_model
 from utils import (
-    load_config, save_checkpoint, calculate_perplexity, 
+    load_config, save_checkpoint, load_checkpoint, calculate_perplexity, 
     AverageMeter, EarlyStopping, count_parameters, 
     clip_gradient, set_seed, plot_training_curves
 )
@@ -114,7 +114,7 @@ def evaluate(model, data_loader, criterion, device):
 
 def main():
     parser = argparse.ArgumentParser(description='Train Penn Treebank Language Model')
-    parser.add_argument('--config', type=str, default='config/config.yaml',
+    parser.add_argument('--config', type=str, default='config/optimal_config.yaml',
                         help='Path to configuration file')
     parser.add_argument('--device', type=str, default='auto',
                         help='Device to use for training (cpu/cuda/auto)')
@@ -157,12 +157,15 @@ def main():
     model = create_model(config, len(vocab))
     model = model.to(device)
     
-    print(f"Model created with {count_parameters(model):,} parameters")
-      # Loss function and optimizer
+    print(f"Model created with {count_parameters(model):,} parameters")    # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     
-    # Get weight decay from config
-    weight_decay = config.get('advanced', {}).get('weight_decay', 0.0)
+    # Get weight decay from config and ensure it's a float
+    weight_decay_value = config.get('advanced', {}).get('weight_decay', 0.0)
+    if isinstance(weight_decay_value, str):
+        weight_decay = float(weight_decay_value)
+    else:
+        weight_decay = float(weight_decay_value)
     optimizer = optim.Adam(model.parameters(), lr=config['training']['learning_rate'], weight_decay=weight_decay)
     
     # Learning rate scheduler
@@ -201,12 +204,17 @@ def main():
     
     # TensorBoard writer
     writer = SummaryWriter(config['logging']['tensorboard_dir'])
-    
-    # Training history
+      # Training history
     train_losses = []
     val_losses = []
     train_perplexities = []
     val_perplexities = []
+    learning_rates = []
+    
+    # Track scheduler state for ReduceLROnPlateau
+    scheduler_reductions = 0
+    epochs_since_improvement = 0
+    best_metric_for_scheduler = float('inf')
     
     # Resume training if checkpoint provided
     start_epoch = 0
@@ -225,14 +233,34 @@ def main():
         train_loss, train_ppl = train_epoch(
                 model, train_loader, criterion, optimizer, device,
             gradient_clip=config['training']['gradient_clip']
-        )
-          # Validate
+        )        # Validate
         val_loss, val_ppl = evaluate(model, valid_loader, criterion, device)
+        
+        # Track current learning rate
+        current_lr = optimizer.param_groups[0]['lr']
+        learning_rates.append(current_lr)
+        
+        # Track scheduler behavior for ReduceLROnPlateau
+        prev_lr = current_lr
         
         # Update learning rate
         if scheduler is not None:
             if scheduler_type == 'reduce_on_plateau':
+                # Track improvement for manual monitoring
+                if val_loss < best_metric_for_scheduler:
+                    best_metric_for_scheduler = val_loss
+                    epochs_since_improvement = 0
+                else:
+                    epochs_since_improvement += 1
+                
                 scheduler.step(val_loss)
+                
+                # Check if learning rate was reduced
+                new_lr = optimizer.param_groups[0]['lr']
+                if new_lr < prev_lr:
+                    scheduler_reductions += 1
+                    print(f"🔻 Learning rate reduced from {prev_lr:.6f} to {new_lr:.6f} (reduction #{scheduler_reductions})")
+                    print(f"   Epochs since improvement: {epochs_since_improvement}, Patience: {scheduler_patience}")
             else:
                 scheduler.step()
         
@@ -248,9 +276,12 @@ def main():
         writer.add_scalar('Perplexity/Train', train_ppl, epoch)
         writer.add_scalar('Perplexity/Validation', val_ppl, epoch)
         writer.add_scalar('Learning_Rate', optimizer.param_groups[0]['lr'], epoch)
-        
         print(f"Train Loss: {train_loss:.4f}, Train PPL: {train_ppl:.2f}")
         print(f"Val Loss: {val_loss:.4f}, Val PPL: {val_ppl:.2f}")
+        print(f"Learning Rate: {current_lr:.6f}")
+        if scheduler_type == 'reduce_on_plateau':
+            print(f"Epochs since LR improvement: {epochs_since_improvement}/{scheduler_patience}")
+        print()
         
         # Save best model
         if val_loss < best_val_loss:
@@ -280,10 +311,9 @@ def main():
     # Log final test results
     writer.add_scalar('Loss/Test', test_loss, epoch)
     writer.add_scalar('Perplexity/Test', test_ppl, epoch)
-    
-    # Plot training curves
+      # Plot training curves
     plot_training_curves(
-            train_losses, val_losses, train_perplexities, val_perplexities,
+        train_losses, val_losses, train_perplexities, val_perplexities, learning_rates,
         save_path=os.path.join(config['logging']['save_dir'], 'training_curves.png')
     )
     

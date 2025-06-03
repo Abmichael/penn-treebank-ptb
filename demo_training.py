@@ -72,7 +72,7 @@ def main():
     print("=" * 50)
     
     # Load configuration
-    with open('config/config.yaml', 'r') as f:
+    with open('config/optimal_config.yaml', 'r') as f:
         config = yaml.safe_load(f)
     
     # Set device
@@ -169,7 +169,7 @@ def main():
     
     print("\n✅ Demo complete!")
     print("\nTo continue training:")
-    print("  python src/train.py --config config/config.yaml")
+    print("  python src/train.py --config config/optimal_config.yaml")
     print("\nTo open the analysis notebook:")
     print("  jupyter notebook notebooks/ptb_exploratory_analysis.ipynb")
 

@@ -192,13 +192,15 @@ def load_ptb_data(data_dir, min_freq=1, sequence_length=35, batch_size=32):
 
 if __name__ == "__main__":
     # Test the data loader
-    data_dir = "../data/ptb"
-    train_loader, valid_loader, test_loader, vocab = load_ptb_data(data_dir)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(script_dir, "..", "data", "ptb")
+    train_loader, valid_loader, test_loader, vocab = load_ptb_data(data_dir, min_freq=3, sequence_length=38, batch_size=64)
     
     # Print sample batch
     for batch_idx, (data, targets) in enumerate(train_loader):
         print(f"Batch {batch_idx}:")
         print(f"Data shape: {data.shape}")
         print(f"Target shape: {targets.shape}")
+        print(f"Sample sequence (encoded): {(data[0].tolist())}")
         print(f"Sample sequence: {vocab.decode(data[0].tolist())}")
         break

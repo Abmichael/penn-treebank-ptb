@@ -58,7 +58,7 @@ def main():
     key_files = [
         ("README.md", "Project documentation"),
         ("requirements.txt", "Dependencies"),
-        ("config/config.yaml", "Training configuration"),
+        ("config/optimal_config.yaml", "Optimal unified configuration"),
         ("data/ptb/ptb.train.txt", "Training data"),
         ("data/ptb/ptb.valid.txt", "Validation data"),
         ("data/ptb/ptb.test.txt", "Test data"),
@@ -127,7 +127,7 @@ def main():
     
     commands = [
         "🎪 Quick Demo: python demo_training.py",
-        "🏋️ Full Training: python src/train.py --config config/config.yaml",
+        "🏋️ Full Training: python src/train.py --config config/optimal_config.yaml",
         "📊 Analysis: jupyter notebook notebooks/ptb_exploratory_analysis.ipynb",
         "🔍 Evaluation: python src/evaluate.py --model_path checkpoints/best_model.pt"
     ]
@@ -139,7 +139,7 @@ def main():
     
     # Load and display key configuration
     try:
-        with open('config/config.yaml', 'r') as f:
+        with open('config/optimal_config.yaml', 'r') as f:
             config = yaml.safe_load(f)
         
         print("🔧 Model Configuration:")

@@ -112,12 +112,14 @@ pip install -r requirements.txt
 
 ### Training
 ```bash
-python src/train.py --config config/config.yaml
+# Train with unified optimal configuration
+python src/train.py --config config/optimal_config.yaml
 ```
 
 ### Evaluation
 ```bash
-python src/evaluate.py --model_path checkpoints/best_model.pth
+# Evaluate trained model
+python src/evaluate.py --model_path checkpoints/best_model.pth --config config/optimal_config.yaml
 ```
 
 ### Project Cleanup
@@ -159,6 +161,30 @@ python scripts/cleanup_project.py --interactive
 - Compressed data archive (`data/ptb/*.tar.zst`)
 - Processed text files (`data/ptb/*.txt`)
 - Documentation and scripts
+
+## 🎯 Unified Optimal Configuration
+
+This project now uses a single, carefully tuned configuration file (`optimal_config.yaml`) that eliminates the complexity of multiple config files while providing optimal performance.
+
+### Key Benefits:
+- **🚫 No Overfitting**: Moderate model capacity with proper regularization
+- **🚫 No Underfitting**: Sufficient complexity for good performance  
+- **⚖️ Balanced**: Proven settings based on PTB best practices
+- **🎯 One Config to Rule Them All**: Simplified workflow, consistent results
+
+### Configuration Highlights:
+- **Model**: 650 hidden units, 2 layers, 0.5 dropout, weight tying
+- **Training**: 64 batch size, 0.001 learning rate, 40 max epochs
+- **Optimization**: Gradient clipping, early stopping, adaptive LR scheduling
+- **Data**: 35 sequence length, min_freq=3, vocabulary-aware sizing
+
+### Previous Approach vs. New Approach:
+| Before | After |
+|--------|-------|
+| Multiple configs (quick, full, overfitting_fix) | Single `optimal_config.yaml` |
+| Configuration complexity | Simplified, proven settings |
+| Inconsistent results | Reliable, balanced performance |
+| Hard to choose right config | One optimal config for all scenarios |
 
 ## Model Architecture
 

@@ -171,7 +171,7 @@ def calculate_word_level_perplexity(model, data_loader, vocab, device):
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate Penn Treebank Language Model')
-    parser.add_argument('--config', type=str, default='config/config.yaml',
+    parser.add_argument('--config', type=str, default='config/optimal_config.yaml',
                         help='Path to configuration file')
     parser.add_argument('--model_path', type=str, required=True,
                         help='Path to trained model checkpoint')
